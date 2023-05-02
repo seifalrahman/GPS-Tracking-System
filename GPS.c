@@ -67,7 +67,7 @@ void GPS_format(){
 						currentLat=atof(GPS_formated[2]);
 					else
 						currentLat=-atof(GPS_formated[3]) ;
-					if(strcmp(GPS_formated[1],"E")==0)
+					if(strcmp(GPS_formated[6],"E")==0)
 						
 				}
 	}

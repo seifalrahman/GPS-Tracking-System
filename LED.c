@@ -23,7 +23,7 @@ void LED_Start(float distance){
 	}
 	if(distance<5 || distance>0.5){
 		//Yellow LED should be lit (there is no yellow LED)
-		GPIO_PORTF_DATA_R &= 0x0C;
+		GPIO_PORTF_DATA_R &= 0x0A;
 	}
 	if(distance>=5){
 		//Red LED should be lit

@@ -53,6 +53,7 @@ void GPS_read(){
 float currentLong, currentLat,speed ,finalLat=1052.563787;
 const double long_final,lat_final ;
 void GPS_format(){
+	//NOT FINISHED YET 
 	char noOfTokenStrings = 0 ;
 	token = strtok (GPS, ",");
 	do {

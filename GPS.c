@@ -53,7 +53,6 @@ void GPS_read(){
 float currentLong, currentLat,speed ,finalLat=1052.563787;
 const double long_final,lat_final ;
 void GPS_format(){
-	//NOT FINISHED YET 
 	char noOfTokenStrings = 0 ;
 	token = strtok (GPS, ",");
 	do {
@@ -61,16 +60,19 @@ void GPS_format(){
 		token=strtok(NULL,",");
 		noOfTokenStrings++;
 	}while(token!=NULL);
-	if(noOfTokenStrings==12){
-				if(strcmp(GPS_formated[1],"A")==0){
+	
+				if(strcmp(GPS_formated[1],"A")==0){//to check that it is valid 
 					if(strcmp(GPS_formated[3],"N")==0)
 						currentLat=atof(GPS_formated[2]);
 					else
-						currentLat=-atof(GPS_formated[3]) ;
-					if(strcmp(GPS_formated[6],"E")==0)
+						currentLat=-atof(GPS_formated[2]) ;
+					if(strcmp(GPS_formated[5],"E")==0)
+						currentLong=atof(GPS_formated[4]);
+					else
+						currentLong=-atof(GPS_formated[4]);
 						
 				}
-	}
+	
 	
 	
 }

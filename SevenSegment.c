@@ -8,7 +8,7 @@ GPIO_PORTB_DATA_R=SevenSegmentArr[Value];
 }
 
 void Split (double distance){
-	int d=distance
+	int d=distance;
 	sig1=d%10;
 	d/=10;
 	sig2=d%10;

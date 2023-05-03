@@ -28,9 +28,16 @@ unsigned char SevenSegmentArr[10]={0x3F,0x6,0x5B,0x4F,0x66,0x6D,0x7D,0x27,0x7F,0
 void SevenSegment_Set (unsigned char Value){
  GPIO_PORTB_DATA_R =SevenSegmentArr[Value];
 }
-void SevenSegment001_Set (unsigned char Value){}
-void SevenSegment010_Set (unsigned char Value){}
-void SevenSegment100_Set (unsigned char Value){}
+void SevenSegment001_Set (unsigned char Value){
+GPIO_PORTB_DATA_R=SevenSegmentArr[Value];
+}
+void SevenSegment010_Set (unsigned char Value){
+GPIO_PORTA_DATA_R=SevenSegmentArr[Value];
+}
+
+void SevenSegment100_Set (unsigned char Value){
+GPIO_PORTD_DATA_R=SevenSegmentArr[Value];
+}
 void Split (double distance){
 	int d=distance ;
 	sig1=d%10;

@@ -211,7 +211,7 @@ GPIO_PORTF_AMSEL_R &= ~0x1F;
 GPIO_PORTF_PCTL_R &= 0x00000;
 GPIO_PORTF_AFSEL_R &= ~0x1F;
 GPIO_PORTF_DIR_R |= 0x0E; // PF4,PF0 in, PF3-1 out
-GPIO_PORTF_PUR_R = 0x11; // pull-up on PF0 and PF4
+GPIO_PORTF_PDR_R = 0x11; // pull-down on PF0 and PF4 ************
 GPIO_PORTF_DEN_R = 0x1F; // digital I/O on PF4-0
 	
 }

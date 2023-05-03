@@ -4,7 +4,7 @@
 
 void GPIOB_Init () {
   SET_BIT(SYSCTL_RCGCGPIO_R,1);
-  while(GET_BIT(SYSCTL_PRGPIO,1)==0);   
+  while(GET_BIT(SYSCTL_PRGPIO_R,1)==0);   
   GPIO_PORTB_CR_R |= 0xFF;              
   GPIO_PORTB_AMSEL_R &= 0x0;        
   GPIO_PORTB_PCTL_R &= 0x0;   

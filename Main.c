@@ -1,18 +1,22 @@
-#include "Main.h"
+#include "GPS.h"
+#include "LED.h"
+#include "SevenSegment.h"
+
+void Split (double distance,int* sig1, int* sig2, int* sig3);
 
 int main(void){
-	
 ////////////////////////////////////////////////////////////////////////// Starting //////////////////////////////////////////////////////////////////////////
 	int SW1=0,SW2=0;
+	int sig1,sig2,sig3;
 	float startingLong,startingLat;
 	float totalDistance=0, distanceFromDestination;
 	float previousLong, previousLat;
+	
 	GPIOF_Init();
 	GPIOB_Init ();
 	GPIOA_Init ();
   GPIOD_Init ();
 	LED_Setup();
-	
 	
 	while(~SW1){ SW1 = GPIO_PORTF_DATA_R&0x10;} //// Press SW1/PF4/ to store starting position
 	GPS_read();
@@ -26,8 +30,7 @@ int main(void){
 	while(~SW2){
 	totalDistance+=	GPS_getDistance(previousLong , previousLat , currentLong , currentLat);    //Traveled distance
 ////////////////////////////////////////////////////////////////////////// Displaying Traveled Distance //////////////////////////////////////////////////////////////////////////
-		
-Split ( totalDistance);
+Split ( totalDistance , &sig1 , &sig2 , &sig3 );
 SevenSegment001_Set (SevenSegmentArr[sig1]);    //PortB
 SevenSegment010_Set (SevenSegmentArr[sig2]);    //PortA
 SevenSegment100_Set (SevenSegmentArr[sig3]);    //PordD
@@ -47,12 +50,15 @@ SevenSegment100_Set (SevenSegmentArr[sig3]);    //PordD
 */	
   GPS_read();                            ///Getting the new location
 	GPS_format();	                         ///Formating the new location 
-		
-		
-		
 	SW2 = GPIO_PORTF_DATA_R&0x01; 	//// Press SW2/PF0/ to end the program
 	}
-	
-	
-	
+}
+
+void Split (double distance, int* sig1, int* sig2, int* sig3){
+	int d=distance;
+	*sig1=d%10;
+	d/=10;
+	*sig2=d%10;
+	d/=10;
+	*sig3=d%10;
 }

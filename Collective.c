@@ -216,36 +216,6 @@ GPIO_PORTF_DEN_R = 0x1F; // digital I/O on PF4-0
 	
 }
 
-unsigned char GPIO_getSwitchValue (unsigned char sw){
-switch(sw){
-	case GPIO_SW1 :return GET_BIT(GPIO_PORTF_DATA_R,4); break;
-	case GPIO_SW2 :return GET_BIT(GPIO_PORTF_DATA_R,0); break;
-	default :return 0;
-}
-
-}
-	
-void setLedValue(unsigned char ledColor, unsigned char ledState){
-switch(ledColor){
-	case GPIO_RED_LED: switch(ledState){
-		case GPIO_LED_OFF: CLR_BIT(GPIO_PORTF_DATA_R,1);break;
-		case GPIO_LED_ON:SET_BIT(GPIO_PORTF_DATA_R,1);break;
-		default :break;
-	} break;
-	case GPIO_BLUE_LED: switch(ledState){
-		case GPIO_LED_OFF: CLR_BIT(GPIO_PORTF_DATA_R,2);break;
-		case GPIO_LED_ON:SET_BIT(GPIO_PORTF_DATA_R,2);break;
-		default :break;
-	} break;
-	case GPIO_GREEN_LED: switch(ledState){
-		case GPIO_LED_OFF: CLR_BIT(GPIO_PORTF_DATA_R,3);break;
-		case GPIO_LED_ON:SET_BIT(GPIO_PORTF_DATA_R,3);break;
-		default :break;
-	} break;
-		default:break;
-}
-}
-
 void GPIOA_Init () {
   SET_BIT(SYSCTL_RCGCGPIO_R,1);
   while(GET_BIT(SYSCTL_PRGPIO_R,1)==0);   
@@ -285,7 +255,7 @@ int main(void){
 	LED_Setup();
 	
 	
-	while(~SW1){ SW1 = GPIO_PORTF_DATA_R&0x10;} //// Press SW1/PF4/ to store starting position
+	while(~SW1){ SW1 = GPIO_PORTF_DATA_R&0x10;} //// Press SW1/PF4/ to store the starting position
 	GPS_read();
 	GPS_format();
 	startingLong=currentLong,startingLat=currentLat;
@@ -295,7 +265,7 @@ int main(void){
 	
 ////////////////////////////////////////////////////////////////////////// Program //////////////////////////////////////////////////////////////////////////
 	while(~SW2){
-	totalDistance+=	GPS_getDistance(previousLong , previousLat , currentLong , currentLat);    //Traveled distance
+	totalDistance+=	GPS_getDistance(previousLong , previousLat , currentLong , currentLat);    //The traveled distance
 ////////////////////////////////////////////////////////////////////////// Displaying Traveled Distance //////////////////////////////////////////////////////////////////////////
 		
 Split ( totalDistance);
@@ -304,22 +274,19 @@ SevenSegment010_Set (SevenSegmentArr[sig2]);    //PortA
 SevenSegment100_Set (SevenSegmentArr[sig3]);    //PordD
 
 ////////////////////////////////////////////////////////////////////////// Leds //////////////////////////////////////////////////////////////////////////	
-	distanceFromDestination=	GPS_getDistance(currentLong , currentLat , long_final,lat_final);   //Distance from final point
+	distanceFromDestination=	GPS_getDistance(currentLong , currentLat , long_final,lat_final);   //Distance from current point to the final point
 	previousLong =	currentLong;
 	previousLat	= currentLat;
 	LED_Start(distanceFromDestination);
 /*  if(distanceFromDestination<=0.5){
 		LED_Start(distanceFromDestination);
 	}
-	
 	else{
 	LED_Start(totalDistance);
 	}
 */	
-  GPS_read();                            ///Getting the new location
+  	GPS_read();  	                          ///Reading the new location
 	GPS_format();	                         ///Formating the new location 
-		
-		
 		
 	SW2 = GPIO_PORTF_DATA_R&0x01; 	//// Press SW2/PF0/ to end the program
 	}

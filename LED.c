@@ -1,5 +1,5 @@
-#include "D:\keil 4\tm4c123gh6pm.h"
-#include "D:\keil 4\bit_utilies.h"
+#include "tm4c123gh6pm.h"
+#include "bit_utilities.h"
 #include "LED.h"
 
 //Initializes the LEDS to be digital output and zero

@@ -1,4 +1,6 @@
 
+#ifndef GPIO
+#define GPIO
 
 ///PortF switches
 #define GPIO_SW1 0
@@ -25,3 +27,4 @@ void GPIOA_Init ();
 void GPIOD_Init ();
 void setLedValue(unsigned char ledColor, unsigned char ledState);
 unsigned char GPIO_getSwitchValue (unsigned char sw);
+#endif

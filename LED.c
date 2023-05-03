@@ -5,7 +5,7 @@
 //Initializes the LEDS to be digital output and zero
 void LED_Setup(){
 	SYSCTL_RCGCGPIO_R |= 0x20;
-	while(~(SYSCTL_RCGCGPIO_R &= 0x20));
+	while(~(SYSCTL_PRGPIO_R & 0x20));
 	GPIO_PORTF_LOCK_R= 0x4C4F434B;
 	GPIO_PORTF_CR_R= 0xFF; // or GPIO_PORTF_CR_R= 0x01; u never know
 	GPIO_PORTF_AMSEL_R &= ~0x0E;

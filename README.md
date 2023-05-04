@@ -10,4 +10,4 @@ This project is divided into a variety of functions on which each member has wor
 4- SevenSegment\
   This function shows the total distance walked since starting the program on 3 Seven Segment displays to a maximum of 999 meters.\
 5- UART\
-  This function controls the baudrate to match it between both the GPS module and the TIVA C M4 microprocessor.\
+  This function controls the baudrate to match it between both the GPS module and the TIVA C M4 microprocessor.

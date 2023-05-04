@@ -7,7 +7,7 @@
 #define GPIO_SW2 1
 #define GPIO_SW_NOT_PRESSED 1
 
-///PortF LED color R/G/B
+///PortF LED color
 #define GPIO_RED_LED 0
 #define GPIO_GREEN_LED 1
 #define GPIO_BLUE_LED 2
@@ -19,7 +19,7 @@
 
 
 
-////////Function Prototypes
+////////Functions
 void GPIOB_Init ();
 //void GPIO_PORTB_set (unsigned char Value);
 void GPIOF_Init();

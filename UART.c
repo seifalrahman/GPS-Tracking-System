@@ -1,5 +1,4 @@
-#include "D:\keil 4\tm4c123gh6pm.h"
-#include "D:\keil 4\bit_utilies.h"
+#include "UART.h"
  
  void UART_Init(void ){
 	
@@ -14,12 +13,8 @@
 	 SET(UART0_LCRH_R,UART_LCRH_FEN);
 	 //enable uart,txe,rxe 
 	 SET(UART0_CTL_R,UART_CTL_UARTEN);
-	 
 	 SET(UART0_CTL_R,UART_CTL_TXE);
-	 
 	 SET(UART0_CTL_R,UART_CTL_RXE);
-	 
-	 
 }
  
  char UART_GetChar (){
@@ -31,4 +26,3 @@
 	return ((UART0_FR_R & UART_FR_RXFE )==UART_FR_RXFE) ;
 	 
  }
- 

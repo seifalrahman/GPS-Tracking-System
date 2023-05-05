@@ -19,7 +19,7 @@
 
 
 
-////////Functions
+////////Functions Prototypes form inialize GPIO's ports
 void GPIOB_Init ();
 //void GPIO_PORTB_set (unsigned char Value);
 void GPIOF_Init();

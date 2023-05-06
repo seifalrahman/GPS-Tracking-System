@@ -4,7 +4,7 @@ int sig1,sig2,sig3;
 unsigned char SevenSegmentArr[10]={0x40,0x79,0x24,0x30,0x19,0x12,0x02,0x78,0x00,0x10};     //common anode
 unsigned char count=0;
 void SevenSegment_Set (unsigned char Value){
-GPIO_PORTB_DATA_R=SevenSegmentArr[Value];
+GPIO_PORTB_DATA_R=SevenSegmentArr[Value];                 //(B0 --> a , B1--> b , ..........B6--> g)
 }
 
 void Split (double distance){      // call in main
@@ -17,8 +17,8 @@ void Split (double distance){      // call in main
 }
 
 void display(int digit,char sig){
-    GPIO_PORTB_DATA_R = 0x11;   // turn off leds
-    GPIO_PORTA_DATA_R = digit;  // 1 enable LSB    2 enable second bit    4 enable MSB
+    GPIO_PORTB_DATA_R = 0x11;   // turn off leds (clear)
+    GPIO_PORTA_DATA_R = digit;  // 1 enable LSB (A0)    2 enable second bit (A1)    4 enable MSB (A2)
     SevenSegment_Set(sig);
 }
 

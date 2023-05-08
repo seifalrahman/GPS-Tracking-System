@@ -10,17 +10,17 @@ float ToRad (float angle){
 }
  float GPS_getDistance(float currentLong , float currentLat , float destLong , float destLat){
 		//Get Radian 
-	 float currentLongRad=ToRad(ToDegree(currentLong)) ;
-	 float currentLatRad=ToRad(ToDegree(currentLat)) ;
-	 float destLongRad = ToRad(ToDegree(destLong)) ;
-	 float destLatRad=ToRad(ToDegree(destLat)) ;
+	 float currentLongRad=ToRad((currentLong)) ;
+	 float currentLatRad=ToRad((currentLat)) ;
+	 float destLongRad = ToRad((destLong)) ;
+	 float destLatRad=ToRad((destLat)) ;
 	 //Get Difference 
 	 float longDiff = destLongRad- currentLongRad ;
 	 float latDiff = destLatRad - currentLatRad ;
 	 // calculate Distance 
 	 float a = pow (sin(latDiff/2),2) +cos(currentLatRad)*cos(destLatRad)*pow(sin(longDiff/2),2) ; 
 	 double c = 2*atan2(sqrt(a) , sqrt(1-a) ) ;
-	 return EARTH_RADIUS*c ;
+	 return 6371000*c ;
  }
  
 char GPS_logName[]="$GPRMC,";

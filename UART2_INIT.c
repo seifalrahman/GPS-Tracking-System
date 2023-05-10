@@ -1,3 +1,6 @@
+#include "tm4c123gh6pm.h"
+#define GET_BIT(reg1,bit)   ((reg1>>bit)&1)
+
 void uart2init()
 {
 	SYSCTL_RCGCUART_R |= 0X04;                  //UART2

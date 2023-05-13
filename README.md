@@ -12,4 +12,4 @@ This project is divided into a variety of functions on which each member has wor
 5- UART\
   This function controls the baudrate to match it between both the GPS module and the TIVA C M4 microprocessor.\
 6- Hardware Components\
-Tiva-c Ublox NEO-6m GPS tested Module.\
+Tiva-c Ublox NEO-6m GPS tested Module.

@@ -1,296 +1,265 @@
-//#include "Main.h"
-#include "TM4C123.h"
-#include "bit_utilities.h"
+#include "D:\keil 4\tm4c123gh6pm.h"
 #include <string.h>
-#include <stdlib.h>
+#include <stdint.h>
 #include <math.h> 
-#define GPIO_SW1 0
-#define GPIO_SW2 1
-#define GPIO_SW_NOT_PRESSED 1
-
-///PortF LED color
-#define GPIO_RED_LED 0
-#define GPIO_GREEN_LED 1
-#define GPIO_BLUE_LED 2
-
-///PortF LED state ON/OFF
-#define GPIO_LED_OFF 0
-#define GPIO_LED_ON 1
+#include <stdio.h>
+#include <stdlib.h>
+#define PI 3.141592653589793238 
+#define GET_REG(reg)        (reg&0xff)
 
 
-//#include "SevenSegment.h"
-//#define GPIO_PORTB_DATA_R       (*((volatile unsigned long *)0x400053FC))
-//#include "TM4C123.h"
-//************************sevensegment.c*******************************
-int sig1,sig2,sig3;
-unsigned char SevenSegmentArr[10]={0x3F,0x6,0x5B,0x4F,0x66,0x6D,0x7D,0x27,0x7F,0x6F};
+void UART_Init(void ){
 	
-void SevenSegment_Set (unsigned char Value){
- GPIO_PORTB_DATA_R =SevenSegmentArr[Value];
-}
-void SevenSegment001_Set (unsigned char Value){
-GPIO_PORTB_DATA_R=SevenSegmentArr[Value];
-}
-void SevenSegment010_Set (unsigned char Value){
-GPIO_PORTA_DATA_R=SevenSegmentArr[Value];
-}
-
-void SevenSegment100_Set (unsigned char Value){
-GPIO_PORTD_DATA_R=SevenSegmentArr[Value];
-}
-void Split (double distance){
-	int d=distance ;
-	sig1=d%10;
-	d/=10;
-	sig2=d%10;
-	d/=10;
-	sig3=d%10;
-}
-
-//************************************************************************************************
-//********************************UART.c*****************************************************
- void UART_Init(void ){
 	
-	 SET_BIT(SYSCTL_RCGCUART_R,0);
-	 while(GET_BIT(SYSCTL_PRUART_R,0)==0);
-	 SET_BIT(SYSCTL_RCGCGPIO_R,0);
-	 while(GET_BIT(SYSCTL_PRGPIO_R,0)==0);
-	 CLR(UART0_CTL_R,UART_CTL_UARTEN);
-	 UART0_IBRD_R=104;
-	 UART0_FBRD_R=11;
-	 SET(UART0_LCRH_R,UART_LCRH_WLEN_8);
-	 SET(UART0_LCRH_R,UART_LCRH_FEN);
-	 //enable uart,txe,rxe 
-	 SET(UART0_CTL_R,UART_CTL_UARTEN);
-	 
-	 SET(UART0_CTL_R,UART_CTL_TXE);
-	 
-	 SET(UART0_CTL_R,UART_CTL_RXE);
-	 
-	 
+	
+	SYSCTL_RCGCUART_R |=0x0001 ;//activate porta 
+		while((SYSCTL_PRUART_R    & 0x01) == 0){};
+	SYSCTL_RCGCGPIO_R |=0x0001 ;// to activate port A
+
+	UART0_CTL_R &=~0x0001; //disabling uart 
+	//*****************************
+	
+	UART0_IBRD_R=104 ;
+	UART0_FBRD_R=11 ;
+	//*****************************
+	
+	UART0_LCRH_R=0x0070; //8-bit word length , enable FIFO 
+	UART0_CTL_R=0x0301; // enable UARTEN ,TXE,RXE 
+	GPIO_PORTA_AFSEL_R |= 0x03 ;// enable alternate function	in pA0,PA1
+	GPIO_PORTA_PCTL_R= (GPIO_PORTA_PCTL_R&0xFFFFFF00)|0x00000011;//choose the UART function 
+	
+	
+	
+	GPIO_PORTA_DEN_R |= 0x03 ; // enable digital I/O on PA0,PA1
+	GPIO_PORTA_AMSEL_R &=~ 0x03 ;//disable analog function on PA0,PA1 
 }
- 
+
+
+
+
+char UART_InChar(void){
+		while(((UART0_FR_R &0x10)!= 0 )) ;//block the program until input is recieved 
+		return (char)( UART0_DR_R & 0xFF ) ;
+}
  char UART_GetChar (){
   while ((UART0_FR_R & UART_FR_RXFE)!=0);
 	 return (char) GET_REG(UART0_DR_R);
  }
- 
- char UART_IsCharAvail (){
-	return ((UART0_FR_R & UART_FR_RXFE )==UART_FR_RXFE) ;
-	 
- }
- //*****************************************************
- //***********************LED.c**********************
- void LED_Setup(){
-	SYSCTL_RCGCGPIO_R |= 0x20;
-	while(!(SYSCTL_PRGPIO_R & 0x20));
-	GPIO_PORTF_LOCK_R= 0x4C4F434B;
-	GPIO_PORTF_CR_R= 0xFF;
-	GPIO_PORTF_AMSEL_R &= ~0x0E;
-	GPIO_PORTF_DEN_R |= 0x0E;
-	GPIO_PORTF_DIR_R |= 0x0E;
-	GPIO_PORTF_PCTL_R &= 0xF000F;
-	GPIO_PORTF_AFSEL_R &= ~0x0E;
-	GPIO_PORTF_DATA_R &= ~0x0E;
+void UART_OutChar(char data){
+		while((UART0_FR_R & 0x0020)!=0);// check if the buffer is empty 
+		UART0_DR_R=data ;
 }
-//Should be called in main at the start of the program after GPS_GetDistance
-void LED_Start(float distance){
-	if(distance<=0.5){
-		//Green LED should be lit
-		GPIO_PORTF_DATA_R &= 0x08;
-	}
-	if(distance<5 || distance>0.5){
-		//Yellow LED should be lit (there is no yellow LED)
-		GPIO_PORTF_DATA_R &= 0x0A;
-	}
-	if(distance>=5){
-		//Red LED should be lit
-		GPIO_PORTF_DATA_R &=0x02;
-	}
+void UART_outString(char *pt){
+		while(*pt){
+			UART_OutChar(*pt) ;
+			pt++ ;
+		}
+		
 }
-//***********************************************************
-//*******************************GPS.c*********************
-const double EARTH_RADIUS = 6371000 ;
-#define PI 3.141592653589793238 
-float ToDegree (float angle ){
-		int degree = (int)angle/100 ; 
-	  float minutes = angle -(float)degree*100;
-		return (degree+(minutes/60)) ;
+
+void getCommandd(char *command , int len ){ 
+		char character ;
+		int i ;
+		for(i=0 ; i<len ; i++){
+				character=UART_InChar();
+				if( character!='\r'){
+						command[i]=character ;
+						UART_OutChar(command[i]) ;
+				}else if (character=='\r' || i==len ){
+						break ;
+				}
+				
+		}
+	
 }
+
+
+void RGB_Init(void){ 
+	SYSCTL_RCGCGPIO_R|=0x20; //INTIALIZE THE CLOCK OF PORTF 
+	while((SYSCTL_PRGPIO_R & 0x20)==0); //delay 
+	GPIO_PORTF_LOCK_R = 0x4C4F434B; //unlocking the ports have the same value 
+	GPIO_PORTF_CR_R |= 0x0E; //Allow changing pin 3,2,1 in portF 
+	GPIO_PORTF_AMSEL_R &=~0x0E; //disable the analog function 
+	GPIO_PORTF_PCTL_R &=~0x0000FFF0; 
+	GPIO_PORTF_AFSEL_R &=~0x0E; //disable the alternate function 
+	GPIO_PORTF_DIR_R |= 0x0E; //Pin1,2,3 is output 
+	GPIO_PORTF_DEN_R |=0x0E; 
+	GPIO_PORTF_DATA_R &=~0x0E; //intialize pins 1,2,3 to be off 
+}
+
+void RGB_setOutput (unsigned char data ){
+		GPIO_PORTF_DATA_R |= data ;
+}
+
+void  RGB_clearOutput(unsigned char data){
+		GPIO_PORTF_DATA_R &=~data ;
+}
+
+double GPStoDeg(double val)
+{
+	return (int)(val / 100) + (val - (int)(val / 100) * 100) / 60.0;
+    
+} //before lat and long is passet to get_distance 
+
 float ToRad (float angle){
-		return angle *PI/100 ;
+		return angle *PI/180 ;
 }
- float GPS_getDistance(float currentLong , float currentLat , float destLong , float destLat){
+
+float GPS_getDistance(float currentLong , float currentLat , float destLong , float destLat){
 		//Get Radian 
-	 float currentLongRad=ToRad((currentLong)) ;
-	 float currentLatRad=ToRad((currentLat)) ;
-	 float destLongRad = ToRad((destLong)) ;
-	 float destLatRad=ToRad((destLat)) ;
+	 float currentLongRad=ToRad(currentLong) ;//phiA
+	 float currentLatRad=ToRad(currentLat) ;//phiB
+	 float destLongRad = ToRad(destLong) ;//lambdaA
+	 float destLatRad=ToRad(destLat) ;//lambdaB
 	 //Get Difference 
 	 float longDiff = destLongRad- currentLongRad ;
 	 float latDiff = destLatRad - currentLatRad ;
 	 // calculate Distance 
 	 float a = pow (sin(latDiff/2),2) +cos(currentLatRad)*cos(destLatRad)*pow(sin(longDiff/2),2) ; 
 		double c = 2*atan2(sqrt(a) , sqrt(1-a) ) ;
-	 return 6371000*c ;
-
- }
-char GPS_logName[]="$GPRMC,";
-char GPS[80] ;
-char GPS_formated[12][20] ;
-char * token ;
-void GPS_read(){
-	char recievedChar ; 
-	char i=0 ;
-	do{
-		while(UART_GetChar()!=GPS_logName[i]);
-		i++;
-		}while(i!=6);
-	//here i make sure that i recieved the correct log 
-		strcpy(GPS,"");
-		do {
-			char fillGPScounter =0 ; 
-			recievedChar=UART_GetChar();
-			GPS[fillGPScounter++]=recievedChar ;
-		}while(recievedChar!='*');
-	
+	 return 6371000*c ; ///another edit 
 }
-float currentLong, currentLat,speed ,finalLat=1052.563787;
-const double long_final,lat_final ;
-void GPS_format(){
-	char noOfTokenStrings = 0 ;
-	token = strtok (GPS, ",");
-	do {
-		strcpy(GPS_formated[noOfTokenStrings],token);
-		token=strtok(NULL,",");
-		noOfTokenStrings++;
-	}while(token!=NULL);
-	
-				if(strcmp(GPS_formated[1],"A")==0){//to check that it is valid 
-					if(strcmp(GPS_formated[3],"N")==0)
-						currentLat=atof(GPS_formated[2]);
-					else
-						currentLat=-atof(GPS_formated[2]) ;
-					if(strcmp(GPS_formated[5],"E")==0)
-						currentLong=atof(GPS_formated[4]);
-					else
-						currentLong=-atof(GPS_formated[4]);
-						
+
+char lat [20]={0}    ;
+char longi [20]={0}  ;
+char speedd [10]={0} ;
+ void getCommand(char *command , char stopchar ){ 
+		char character [1] ;
+		int i = 0  ;
+		while(1){
+				getCommandd(character,1);
+				if( character[0]!=stopchar){
+						command[i]=character[0] ;
+					  i++ ;
+						//UART_OutChar(command[i]) ;
+				}else if (character[0]==stopchar ){
+						break ;
 				}
-	
-	
-	
-}
-
- 
-//**************************************************************
-//****************************GPIO.c***************************
-
-void GPIOB_Init () {
-  SET_BIT(SYSCTL_RCGCGPIO_R,1);
-  while(GET_BIT(SYSCTL_PRGPIO_R,1)==0);   
-  GPIO_PORTB_CR_R |= 0xFF;              
-  GPIO_PORTB_AMSEL_R &= 0x0;        
-  GPIO_PORTB_PCTL_R &= 0x0;   
-  GPIO_PORTB_DIR_R |= 0xFF;           
-  GPIO_PORTB_AFSEL_R &= 0x00;                   
-  GPIO_PORTB_DEN_R |= 0xFF;                 
-}
-/*void GPIO_PORTB_set (unsigned char Value){
-	
-	GPIO_PORTB_DATA_R= Value;
-}*/
-
-void GPIOF_Init(){
-	SYSCTL_RCGCGPIO_R |= 0x00000020; // activate Port F
-while((SYSCTL_PRGPIO_R&0x00000020) == 0){};
-	
-GPIO_PORTF_LOCK_R= 0x4C4F434B;	
-GPIO_PORTF_CR_R = 0x1F; // allow changes to PF4-0
-GPIO_PORTF_AMSEL_R &= ~0x1F;
-GPIO_PORTF_PCTL_R &= 0x00000;
-GPIO_PORTF_AFSEL_R &= ~0x1F;
-GPIO_PORTF_DIR_R |= 0x0E; // PF4,PF0 in, PF3-1 out
-GPIO_PORTF_PDR_R = 0x11; // pull-down on PF0 and PF4 ************
-GPIO_PORTF_DEN_R = 0x1F; // digital I/O on PF4-0
+				
+		}
 	
 }
 
-void GPIOA_Init () {
-  SET_BIT(SYSCTL_RCGCGPIO_R,1);
-  while(GET_BIT(SYSCTL_PRGPIO_R,1)==0);   
-  GPIO_PORTA_CR_R |= 0xFF;              
-  GPIO_PORTA_AMSEL_R &= 0x0;        
-  GPIO_PORTA_PCTL_R &= 0x0;   
-  GPIO_PORTA_DIR_R |= 0xFF;           
-  GPIO_PORTA_AFSEL_R &= 0x00;                   
-  GPIO_PORTA_DEN_R |= 0xFF;                 
+char GPS_logName[]="$GPRMC,";
+//char GPS[80] ;
+char Valid [1] ; 
+char N_or_S [1];
+char E_or_W [1];
+float currentLong, currentLat,speed ;
+double long_final=31.2806451,lat_final=30.0648936; 
+void GPS_read2(){
+	char counter =0 ;
+	char  recievedChar [1];
+	char i=0 ;
+	char flag =1 ;
+	char c [1];
+	do{
+		getCommandd(c,1);
+		while(c[0]!=GPS_logName[i]){
+			memset(c,0,1);
+			getCommandd(c,1);
+		}
+		i++;
+		}while(i!=7);
+	while(1){
+			if(flag){
+				
+				
+				getCommandd(recievedChar,1);
+				if(recievedChar[0]==','){counter++;}
+			}
+			switch(counter){
+				case 1 : getCommandd(Valid,1); break ;
+				case 2 : getCommand(lat,',');counter++;flag=0;break;
+				case 3 : getCommandd(N_or_S,1);flag=1;break;
+				case 4 : getCommand(longi,',');counter++;flag=0;break;
+				case 5 : getCommandd(E_or_W,1);flag=1;break;
+				case 6 : getCommand(speedd,',');counter++;flag=0;break;
+			
+			}
+			if(counter==7) break;
+	
+	}
+	if(N_or_S[0]=='N')
+						currentLat=atof(lat);
+					else
+						currentLat=-atof(lat) ;
+	if(E_or_W[0]=='E')
+						currentLong=atof(longi);
+					else
+						currentLong=-atof(longi);
+
 }
-
-void GPIOD_Init () {
-  SET_BIT(SYSCTL_RCGCGPIO_R,1);
-  while(GET_BIT(SYSCTL_PRGPIO_R,1)==0);   
-  GPIO_PORTD_CR_R |= 0xFF;              
-  GPIO_PORTD_AMSEL_R &= 0x0;        
-  GPIO_PORTD_PCTL_R &= 0x0;   
-  GPIO_PORTD_DIR_R |= 0xFF;           
-  GPIO_PORTD_AFSEL_R &= 0x00;                   
-  GPIO_PORTD_DEN_R |= 0xFF;                 
-}
-//*********************************************************
+//IN the main donnot forget to do memset to the arrays and donnot forget checking if it is valid or not and if you used GPS_read2() we will not use gps_read  nor gps_format
 
 
+float total_distance =0;
+float prevlat,prevlong ;
 
 int main(void){
+		//char str[20];
 	
-////////////////////////////////////////////////////////////////////////// Starting //////////////////////////////////////////////////////////////////////////
-	int SW1=0,SW2=0;
-	float startingLong,startingLat;
-	float totalDistance=0, distanceFromDestination;
-	float previousLong, previousLat;
-	GPIOF_Init();
-	GPIOB_Init ();
-	GPIOA_Init ();
-  GPIOD_Init ();
-	LED_Setup();
+		float distance ;
 	
+		UART_Init();
+	  RGB_Init() ;
+		RGB_setOutput (0x8);
+		RGB_setOutput (0x2);
 	
-	while(~SW1){ SW1 = GPIO_PORTF_DATA_R&0x10;} //// Press SW1/PF4/ to store the starting position
-	GPS_read();
-	GPS_format();
-	startingLong=currentLong,startingLat=currentLat;
-	//GPS_getDistance(startingLong ,startingLat , currentLong , currentLat);
-	
-  previousLong=startingLong, previousLat=startingLat;
-	
-////////////////////////////////////////////////////////////////////////// Program //////////////////////////////////////////////////////////////////////////
-	while(~SW2){
-	totalDistance+=	GPS_getDistance(previousLong , previousLat , currentLong , currentLat);    //The traveled distance
-////////////////////////////////////////////////////////////////////////// Displaying Traveled Distance //////////////////////////////////////////////////////////////////////////
-		
-Split ( totalDistance);
-SevenSegment001_Set (SevenSegmentArr[sig1]);    //PortB
-SevenSegment010_Set (SevenSegmentArr[sig2]);    //PortA
-SevenSegment100_Set (SevenSegmentArr[sig3]);    //PordD
+		/*currentLat=30.063089 ;
+		currentLong=31.299038 ;
+		distance = GPS_getDistance(currentLong ,currentLat ,long_final ,lat_final) ;
+		//sprintf(str, "%f", distance);
+		//UART_outString(str);
+	  if(distance >5000){
+			RGB_setOutput (0x2);
+		}else if ((distance<5000 && distance >1000)){
+			RGB_setOutput (0x4);
+		}else if (distance <1000){
+			RGB_setOutput (0x8);
+		}*/
 
-////////////////////////////////////////////////////////////////////////// Leds //////////////////////////////////////////////////////////////////////////	
-	distanceFromDestination=	GPS_getDistance(currentLong , currentLat , long_final,lat_final);   //Distance from current point to the final point
-	previousLong =	currentLong;
-	previousLat	= currentLat;
-	LED_Start(distanceFromDestination);
-/*  if(distanceFromDestination<=0.5){
-		LED_Start(distanceFromDestination);
-	}
-	else{
-	LED_Start(totalDistance);
-	}
-*/	
-  	GPS_read();  	                          ///Reading the new location
-	GPS_format();	                         ///Formating the new location 
+GPS_read2() ;
+long_final=currentLong ;
+lat_final= currentLat;
+
+
+while(1){
+				memset(lat,0,20);
+				memset(longi,0,20);
+			  memset(speedd,0,20);
+				//UART_outString("Enter:\n") ;
+				prevlat=currentLat   ;
+				prevlong=currentLong ;
+				GPS_read2()          ;
+				total_distance+=GPS_getDistance( currentLong ,  currentLat , prevlong , prevlat) ;
+			 //RGB_clearOutput(0xE);
+			 // RGB_setOutput (0x8);
+		   
+				//UART_outString("lat  is ") ;
+			
+				//UART_outString(lat);
+				//UART_outString("\n") ;
+			  //UART_outString("long  is ") ;
+				//UART_outString(longi);
+				//UART_outString("\n") ;
+				distance = GPS_getDistance(currentLong ,currentLat ,long_final ,lat_final) ;
+		if(distance >1000){
+					RGB_clearOutput(0xE);
+					RGB_setOutput (0x2);
+			
+		}else if ((distance<1000 && distance >200)){
+			RGB_clearOutput(0xE);
+			RGB_setOutput (0x2);
+			RGB_setOutput (0x8);
+		}else if (distance <200){
+			RGB_clearOutput(0xE);
+			RGB_setOutput (0x8);
+			 
+		}
+		}
+
+		total_distance=total_distance/2 ;
 		
-	SW2 = GPIO_PORTF_DATA_R&0x01; 	//// Press SW2/PF0/ to end the program
-	}
-	
-	
-	
-}
+	}	
+		

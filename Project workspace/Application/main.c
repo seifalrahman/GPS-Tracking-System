@@ -35,7 +35,7 @@ int main(void){
 			RGB_setOutput (0x8);
 		}*/
 
-GPS_read2() ;
+GPS_read2();
 long_final=currentLong ;
 lat_final= currentLat;
 

@@ -19,8 +19,8 @@ int main(void){
 	
 		UART_Init();
 	  RGB_Init() ;
-	RGB_setOutput (0x8);
-	RGB_setOutput (0x2);
+		RGB_setOutput (0x8);
+		RGB_setOutput (0x2);
 	
 		/*currentLat=30.063089 ;
 		currentLong=31.299038 ;
@@ -34,32 +34,35 @@ int main(void){
 		}else if (distance <1000){
 			RGB_setOutput (0x8);
 		}*/
+
 GPS_read2() ;
 long_final=currentLong ;
 lat_final= currentLat;
 
 
-	while(1){
+while(1){
 				memset(lat,0,20);
 				memset(longi,0,20);
 			  memset(speedd,0,20);
 				//UART_outString("Enter:\n") ;
-				GPS_read2() ;
-		RGB_clearOutput(0xE);
-			  RGB_setOutput (0x8);
+				prevlat=currentLat   ;
+				prevlong=currentLong ;
+				GPS_read2()          ;
+				total_distance+=GPS_getDistance( currentLong ,  currentLat , prevlong , prevlat) ;
+			 //RGB_clearOutput(0xE);
+			 // RGB_setOutput (0x8);
 		   
 				//UART_outString("lat  is ") ;
 			
 				//UART_outString(lat);
 				//UART_outString("\n") ;
-			//	UART_outString("long  is ") ;
+			  //UART_outString("long  is ") ;
 				//UART_outString(longi);
 				//UART_outString("\n") ;
 				distance = GPS_getDistance(currentLong ,currentLat ,long_final ,lat_final) ;
-				printf("%f",distance);
-				if(distance >1000){
+		if(distance >1000){
 					RGB_clearOutput(0xE);
-			RGB_setOutput (0x2);
+					RGB_setOutput (0x2);
 			
 		}else if ((distance<1000 && distance >200)){
 			RGB_clearOutput(0xE);
@@ -70,8 +73,9 @@ lat_final= currentLat;
 			RGB_setOutput (0x8);
 			 
 		}
-		
 		}
-		
+
+		total_distance=total_distance/2 ;
+	
 		
 	}
